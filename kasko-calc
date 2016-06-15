@@ -1,0 +1,195 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from __future__ import print_function
+
+import os
+import optparse
+
+import xlrd
+import xlsxwriter
+from selenium.webdriver import Firefox
+
+from pages import KaskoCalcPage
+
+
+def load(filename):
+    workbook = xlrd.open_workbook(filename)
+    sheet = workbook.sheet_by_index(0)
+
+    data = []
+    if sheet.nrows > 1:
+        for row in range(sheet.nrows)[1:]:
+            data.append({
+                "city": sheet.cell_value(row, 0),
+                "car_brand": sheet.cell_value(row, 1),
+                "car_model": sheet.cell_value(row, 2),
+                "car_year": sheet.cell_value(row, 3),
+                "car_engine_model": sheet.cell_value(row, 4),
+                "car_modification": sheet.cell_value(row, 5),
+                "car_transmission_type": sheet.cell_value(row, 6),
+                "is_credit_car": sheet.cell_value(row, 7),
+                "car_night_parking_type": sheet.cell_value(row, 8),
+                "car_autostart": sheet.cell_value(row, 9),
+                "car_is_new": sheet.cell_value(row, 10),
+                "car_mileage": sheet.cell_value(row, 11),
+                "car_using_start_date": sheet.cell_value(row, 12),
+                "car_price": sheet.cell_value(row, 13),
+                "antitheft": sheet.cell_value(row, 14),
+                "insure_additional_equipment": sheet.cell_value(row, 15),
+                "audio_equipment_sum": sheet.cell_value(row, 16),
+                "other_equipment_sum": sheet.cell_value(row, 17),
+                "multi_drive": sheet.cell_value(row, 18),
+                "multi_drive_light": sheet.cell_value(row, 19),
+                "driver_age": str(
+                    sheet.cell_value(row, 20)).split(';'),
+                "driver_experience_years": str(
+                    sheet.cell_value(row, 21)).split(';'),
+                "driver_sex": str(
+                    sheet.cell_value(row, 22)).split(';'),
+                "driver_has_children": str(
+                    sheet.cell_value(row, 23)).split(';'),
+                "driver_is_married": str(
+                    sheet.cell_value(row, 24)).split(';'),
+                "date_begin": sheet.cell_value(row, 25),
+                "discount_sizepj": sheet.cell_value(row, 26)
+            })
+
+    return data
+
+
+def report(filename, results):
+    workbook_in = xlrd.open_workbook(filename)
+    sheet = workbook_in.sheet_by_index(0)
+
+    out = "%s.out.xls" % os.path.basename(filename).split('.')[0]
+    workbook_out = xlsxwriter.Workbook(out)
+    worksheet = workbook_out.add_worksheet()
+
+    for row in range(sheet.nrows):
+        for col in range(sheet.ncols):
+            worksheet.write(row, col, sheet.cell_value(row, col))
+            if col == (sheet.ncols - 1):
+                worksheet.write(row, col + 1, results[row])
+
+    workbook_out.close()
+
+
+def calculate(params):
+    result = None
+    try:
+        driver = Firefox()
+        driver.maximize_window()
+
+        page = KaskoCalcPage(driver)
+        page.get(KaskoCalcPage.URL)
+
+        if params["city"] == "Москва":
+            page.city_mos.click()
+        elif params["city"] == "Санкт-Петербург":
+            page.city_sp.click()
+        elif params["city"] == "Нижний Новгород":
+            page.city_nn.click()
+        else:
+            raise ValueError("Некорректный город")
+
+        page.car_brand(params["car_brand"]).click()
+        page.car_model(params["car_model"]).click()
+        page.car_year(params["car_year"]).click()
+        page.car_engine_model(params["car_engine_model"]).click()
+        page.car_modification(params["car_modification"]).click()
+        page.car_transmission_type(params["car_transmission_type"]).click()
+        page.is_credit_car(params["is_credit_car"]).click()
+        page.car_night_parking_type(params["car_night_parking_type"]).click()
+        page.car_autostart(params["car_autostart"]).click()
+
+        if params["car_is_new"]:
+            if params["car_is_new"] == "Новый":
+                page.car_is_new.click()
+            elif params["car_is_new"] == "С пробегом":
+                page.car_is_mileage.click()
+                page.car_mileage = int(params["car_mileage"])
+
+        page.car_using_start_date = params["car_using_start_date"]
+        if params["car_price"]:
+            page.car_price = int(params["car_price"])
+
+        if params["antitheft"]:
+            if params["antitheft"] == "Штатная":
+                page.antitheft_included.click()
+            else:
+                page.antitheft_other.click()
+                page.wait_hide_loader()
+                page.antitheft_system_models = params["antitheft"]
+
+        if params["insure_additional_equipment"] == "Да":
+            page.insure_additional_equipment.click()
+            page.audio_equipment_sum = int(params["audio_equipment_sum"])
+            page.other_equipment_sum = int(params["other_equipment_sum"])
+
+        if params["multi_drive"] == "Да":
+            page.multi_drive.click()
+        if params["multi_drive_light"] == "Да":
+            page.multi_drive_light.click()
+        if params["multi_drive"] != "Да" and \
+                params["multi_drive_light"] != "Да":
+            for i in range(len(params["driver_age"])):
+                if i > 0:
+                    page.add_usage_driver.click()
+                page.driver_age(i, int(float(params["driver_age"][i])))
+                page.driver_experience_years(
+                    i, int(float(params["driver_experience_years"][i])))
+                if params["driver_sex"][i] == "Мужской":
+                    page.driver_sex_male(i).click()
+                elif params["driver_sex"][i] == "Женский":
+                    page.driver_sex_female(i).click()
+                if params["driver_has_children"][i] == "Да":
+                    page.driver_has_children_yes(i).click()
+                elif params["driver_has_children"][i] == "Нет":
+                    page.driver_has_children_no(i).click()
+                if params["driver_is_married"][i] == "Да":
+                    page.driver_is_married_yes(i).click()
+                elif params["driver_is_married"][i] == "Нет":
+                    page.driver_is_married_no(i).click()
+
+        page.date_begin = params["date_begin"]
+
+        if params["discount_sizepj"] == "Да":
+            page.discount_sizepj.click()
+
+        page.calculate.click()
+        page.wait_calculation()
+
+        if page.errors:
+            result = page.errors
+        else:
+            result = page.result
+    except Exception as e:
+        result = str(e)
+    finally:
+        driver.close()
+
+    return result
+
+
+def main():
+    parser = optparse.OptionParser(usage="%prog <file>")
+    _, args = parser.parse_args()
+
+    if len(args) < 1:
+        parser.error("Invalid arguments")
+
+    filename = args[0]
+
+    if not os.path.exists(filename):
+        parser.error("File '%s' not exists" % filename)
+
+    results = ["Cумма"]
+    for data in load(filename):
+        results.append(calculate(data))
+
+    report(filename, results)
+
+
+if __name__ == "__main__":
+    main()
