@@ -4,10 +4,7 @@ from page_object import PageObject, PageElements
 from page_object.elements import Button, Link, Select
 from selenium.webdriver.support.wait import WebDriverWait
 
-from elements import Input
-
-
-Label = Link
+from elements import Label, Input
 
 
 class KaskoCalcPage(PageObject):
@@ -51,10 +48,10 @@ class KaskoCalcPage(PageObject):
                             (panel_id, value))).__get__(self, self.__class__)
 
     def _label_avg(self, panel_id):
-         labels = PageElements(xpath="//div[@id='%s']/ul/li/div/label" % \
-                               panel_id).__get__(self, self.__class__)
-         index = int(round((len(labels) / 2.0)))
-         return labels[index]
+        labels = PageElements(xpath="//div[@id='%s']/ul/li/div/label" %
+                              panel_id).__get__(self, self.__class__)
+        index = int(round((len(labels) / 2.0)))
+        return labels[index]
 
     def car_brand(self, value):
         return self._label("CarBrandsPanel", value)

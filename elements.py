@@ -1,6 +1,10 @@
 # -*- coding: utf-8 -*-
 
 from page_object import PageElement
+from page_object.elements import Link
+
+
+Label = Link
 
 
 class Input(PageElement):
