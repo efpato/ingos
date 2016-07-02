@@ -9,6 +9,7 @@ import optparse
 import xlrd
 import xlsxwriter
 from selenium.webdriver import Firefox
+from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 
 from pages import KaskoCalcPage
 
@@ -25,34 +26,32 @@ def load(filename):
                 "car_brand": sheet.cell_value(row, 1),
                 "car_model": sheet.cell_value(row, 2),
                 "car_year": sheet.cell_value(row, 3),
-                "car_engine_model": sheet.cell_value(row, 4),
-                "car_modification": sheet.cell_value(row, 5),
-                "car_transmission_type": sheet.cell_value(row, 6),
-                "is_credit_car": sheet.cell_value(row, 7),
-                "car_night_parking_type": sheet.cell_value(row, 8),
-                "car_autostart": sheet.cell_value(row, 9),
-                "car_is_new": sheet.cell_value(row, 10),
-                "car_mileage": sheet.cell_value(row, 11),
-                "car_using_start_date": sheet.cell_value(row, 12),
-                "car_price": sheet.cell_value(row, 13),
-                "antitheft": sheet.cell_value(row, 14),
-                "insure_additional_equipment": sheet.cell_value(row, 15),
-                "audio_equipment_sum": sheet.cell_value(row, 16),
-                "other_equipment_sum": sheet.cell_value(row, 17),
-                "multi_drive": sheet.cell_value(row, 18),
-                "multi_drive_light": sheet.cell_value(row, 19),
+                "car_transmission_type": sheet.cell_value(row, 4),
+                "is_credit_car": sheet.cell_value(row, 5),
+                "car_night_parking_type": sheet.cell_value(row, 6),
+                "car_autostart": sheet.cell_value(row, 7),
+                "car_is_new": sheet.cell_value(row, 8),
+                "car_mileage": sheet.cell_value(row, 9),
+                "car_using_start_date": sheet.cell_value(row, 10),
+                "car_price": sheet.cell_value(row, 11),
+                "antitheft": sheet.cell_value(row, 12),
+                "insure_additional_equipment": sheet.cell_value(row, 13),
+                "audio_equipment_sum": sheet.cell_value(row, 14),
+                "other_equipment_sum": sheet.cell_value(row, 15),
+                "multi_drive": sheet.cell_value(row, 16),
+                "multi_drive_light": sheet.cell_value(row, 17),
                 "driver_age": str(
-                    sheet.cell_value(row, 20)).split(';'),
+                    sheet.cell_value(row, 18)).split(';'),
                 "driver_experience_years": str(
-                    sheet.cell_value(row, 21)).split(';'),
+                    sheet.cell_value(row, 19)).split(';'),
                 "driver_sex": str(
-                    sheet.cell_value(row, 22)).split(';'),
+                    sheet.cell_value(row, 20)).split(';'),
                 "driver_has_children": str(
-                    sheet.cell_value(row, 23)).split(';'),
+                    sheet.cell_value(row, 21)).split(';'),
                 "driver_is_married": str(
-                    sheet.cell_value(row, 24)).split(';'),
-                "date_begin": sheet.cell_value(row, 25),
-                "discount_sizepj": sheet.cell_value(row, 26)
+                    sheet.cell_value(row, 22)).split(';'),
+                "date_begin": sheet.cell_value(row, 23),
+                "discount_sizepj": sheet.cell_value(row, 24)
             })
 
     return data
@@ -77,10 +76,16 @@ def report(filename, results):
 
 def calculate(params):
     result = None
-    try:
-        driver = Firefox()
-        driver.maximize_window()
 
+    if os.getenv("DEVEL") is not None:
+        binary = FirefoxBinary("/opt/firefox-46.0.1/firefox")
+        driver = Firefox(firefox_binary=binary)
+    else:
+        driver = Firefox()
+
+    driver.maximize_window()
+
+    try:
         page = KaskoCalcPage(driver)
         page.get(KaskoCalcPage.URL)
 
@@ -96,8 +101,8 @@ def calculate(params):
         page.car_brand(params["car_brand"]).click()
         page.car_model(params["car_model"]).click()
         page.car_year(params["car_year"]).click()
-        page.car_engine_model(params["car_engine_model"]).click()
-        page.car_modification(params["car_modification"]).click()
+        page.car_engine_model().click()
+        page.car_modification().click()
         page.car_transmission_type(params["car_transmission_type"]).click()
         page.is_credit_car(params["is_credit_car"]).click()
         page.car_night_parking_type(params["car_night_parking_type"]).click()

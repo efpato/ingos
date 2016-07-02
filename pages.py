@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-from page_object import PageObject
+from page_object import PageObject, PageElements
 from page_object.elements import Button, Link, Select
 from selenium.webdriver.support.wait import WebDriverWait
 
@@ -50,6 +50,12 @@ class KaskoCalcPage(PageObject):
                             "label[contains(text(), '%s')]" %
                             (panel_id, value))).__get__(self, self.__class__)
 
+    def _label_avg(self, panel_id):
+         labels = PageElements(xpath="//div[@id='%s']/ul/li/div/label" % \
+                               panel_id).__get__(self, self.__class__)
+         index = int(round((len(labels) / 2.0)))
+         return labels[index]
+
     def car_brand(self, value):
         return self._label("CarBrandsPanel", value)
 
@@ -59,11 +65,11 @@ class KaskoCalcPage(PageObject):
     def car_year(self, value):
         return self._label("CarManifacturingYearsPanel", value)
 
-    def car_engine_model(self, value):
-        return self._label("CarEngineModelsPanel", value)
+    def car_engine_model(self):
+        return self._label_avg("CarEngineModelsPanel")
 
-    def car_modification(self, value):
-        return self._label("CarModificationsPanel", value)
+    def car_modification(self):
+        return self._label_avg("CarModificationsPanel")
 
     def car_transmission_type(self, value):
         return self._label("CarTransmissionTypesPanel", value)
