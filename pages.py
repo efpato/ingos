@@ -57,31 +57,55 @@ class KaskoCalcPage(PageObject):
         return labels[index]
 
     def car_brand(self, value):
-        return self._label("CarBrandsPanel", value)
+        self._label("CarBrandsPanel", value).click()
 
     def car_model(self, value):
-        return self._label("CarModelsPanel", value)
+        try:
+            self._label("CarModelsPanel", value).click()
+        except:
+            pass
 
     def car_year(self, value):
-        return self._label("CarManifacturingYearsPanel", value)
+        try:
+            self._label("CarManifacturingYearsPanel", value).click()
+        except:
+            pass
 
     def car_engine_model(self):
-        return self._label_avg("CarEngineModelsPanel")
+        try:
+            self._label_avg("CarEngineModelsPanel").click()
+        except:
+            pass
 
     def car_modification(self):
-        return self._label_avg("CarModificationsPanel")
+        try:
+            self._label_avg("CarModificationsPanel").click()
+        except:
+            pass
 
     def car_transmission_type(self, value):
-        return self._label("CarTransmissionTypesPanel", value)
+        try:
+            self._label("CarTransmissionTypesPanel", value).click()
+        except:
+            pass
 
     def is_credit_car(self, value):
-        return self._label("CarIsCreditCarPanel", value)
+        try:
+            self._label("CarIsCreditCarPanel", value).click()
+        except:
+            pass
 
     def car_night_parking_type(self, value):
-        return self._label("CarNightParkingTypePanel", value)
+        try:
+            self._label("CarNightParkingTypePanel", value).click()
+        except:
+            pass
 
     def car_autostart(self, value):
-        return self._label("CarAutostartPanel", value)
+        try:
+            self._label("CarAutostartPanel", value).click()
+        except:
+            pass
 
     def driver_age(self, index, value):
         return Input(css="input#KaskoDriverAge%d" % index).__set__(

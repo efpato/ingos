@@ -3,6 +3,8 @@
 
 import os
 import optparse
+import sys
+import traceback
 
 import xlrd
 import xlsxwriter
@@ -104,15 +106,15 @@ def calculate(params):
         else:
             page.city_mos.click()
 
-        page.car_brand(params["car_brand"]).click()
-        page.car_model(params["car_model"]).click()
-        page.car_year(params["car_year"]).click()
-        page.car_engine_model().click()
-        page.car_modification().click()
-        page.car_transmission_type(params["car_transmission_type"]).click()
-        page.is_credit_car(params["is_credit_car"]).click()
-        page.car_night_parking_type(params["car_night_parking_type"]).click()
-        page.car_autostart(params["car_autostart"]).click()
+        page.car_brand(params["car_brand"])
+        page.car_model(params["car_model"])
+        page.car_year(params["car_year"])
+        page.car_engine_model()
+        page.car_modification()
+        page.car_transmission_type(params["car_transmission_type"])
+        page.is_credit_car(params["is_credit_car"])
+        page.car_night_parking_type(params["car_night_parking_type"])
+        page.car_autostart(params["car_autostart"])
 
         if params["car_is_new"]:
             if params["car_is_new"] == "Новый":
@@ -181,8 +183,10 @@ def calculate(params):
                 if page.has_franchise:
                     info += ";Франшиза: %s" % page.franchise_value
                 result.append((page.result, info))
-    except Exception as e:
-        result = str(e)
+    except:
+        etype, value, tb = sys.exc_info()
+        result = "%r" % value
+        traceback.print_exception(etype, value, tb)
     finally:
         driver.close()
 
