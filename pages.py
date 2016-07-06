@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from page_object import PageObject, PageElements
-from page_object.elements import Button, Link, Select
+from page_object.elements import Button, Checkbox, Link, Select
 from selenium.webdriver.support.wait import WebDriverWait
 
 from elements import Label, Input
@@ -36,6 +36,9 @@ class KaskoCalcPage(PageObject):
 
     # Параметры страхового полиса
     date_begin = Input(css="input#KaskoAgrDateBeg")
+
+    variants = PageElements(css="ul#KaskoVariants li")
+    variant_info = PageElements(css="ul#kaskoCalculationVariantInfo li")
 
     # Расчет скидки
     discount_sizepj = Label(css="label[for='TP_DISCOUNTSIZEPJ']")
@@ -129,6 +132,24 @@ class KaskoCalcPage(PageObject):
             lambda driver: "none" == driver.find_element_by_id(
                 "spinnerStep1").value_of_css_property("display"),
             "Calculation timeout expired")
+
+    @property
+    def has_franchise(self):
+        return self.webdriver.execute_script(
+            """
+            return (function () {{
+                var o = $('input#kaskoIncludeFranchise1');
+                return o.is(':visible') && o.is(':checked');
+            }})();
+            """)
+
+    @property
+    def franchise_value(self):
+        return self.webdriver.execute_script(
+            """
+            return $("select#KaskoFranchise1Limits option").filter(
+                ':selected').text();
+            """)
 
     @property
     def result(self):

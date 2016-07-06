@@ -57,17 +57,25 @@ def load(filename):
 
 def report(filename, results):
     workbook_in = xlrd.open_workbook(filename)
-    sheet = workbook_in.sheet_by_index(0)
+    sheet_in = workbook_in.sheet_by_index(0)
 
     out = "%s.out.xls" % os.path.basename(filename).split('.')[0]
     workbook_out = xlsxwriter.Workbook(out)
-    worksheet = workbook_out.add_worksheet()
+    sheet_out = workbook_out.add_worksheet()
 
-    for row in range(sheet.nrows):
-        for col in range(sheet.ncols):
-            worksheet.write(row, col, sheet.cell_value(row, col))
-            if col == (sheet.ncols - 1):
-                worksheet.write(row, col + 1, results[row])
+    for row in range(sheet_in.nrows):
+        for col in range(sheet_in.ncols):
+            sheet_out.write(row, col, sheet_in.cell_value(row, col))
+
+        col = sheet_in.ncols
+        if not isinstance(results[row], list):
+            sheet_out.write(row, col, results[row])
+        else:
+            for total, description in results[row]:
+                sheet_out.write(row, col, total)
+                col += 1
+                sheet_out.write(row, col, description)
+                col += 1
 
     workbook_out.close()
 
@@ -94,7 +102,7 @@ def calculate(params):
         elif params["city"] == "Нижний Новгород":
             page.city_nn.click()
         else:
-            raise ValueError("Некорректный город")
+            page.city_mos.click()
 
         page.car_brand(params["car_brand"]).click()
         page.car_model(params["car_model"]).click()
@@ -166,7 +174,13 @@ def calculate(params):
         if page.errors:
             result = page.errors
         else:
-            result = page.result
+            result = []
+            for variant in page.variants:
+                variant.click()
+                info = ';'.join((info.text for info in page.variant_info))
+                if page.has_franchise:
+                    info += ";Франшиза: %s" % page.franchise_value
+                result.append((page.result, info))
     except Exception as e:
         result = str(e)
     finally:
@@ -187,7 +201,12 @@ def main():
     if not os.path.exists(filename):
         parser.error("File '%s' not exists" % filename)
 
-    results = ["Cумма"]
+    results = [[("Вариант 1", "Описание 1"),
+                ("Вариант 2", "Описание 2"),
+                ("Вариант 3", "Описание 3"),
+                ("Вариант 4", "Описание 4"),
+                ("Вариант 5", "Описание 5"),
+                ("Вариант 6", "Описание 6")]]
     for data in load(filename):
         results.append(calculate(data))
 
