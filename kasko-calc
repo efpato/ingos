@@ -1,8 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import os
+import logging
 import optparse
+import os
 import sys
 import traceback
 
@@ -12,6 +13,14 @@ from selenium.webdriver import Firefox
 from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 
 from pages import KaskoCalcPage
+
+
+logging.basicConfig(format=("%(asctime)s  %(levelname)-8s "
+                            "%(module)-15s %(message)s"),
+                    level=logging.DEBUG)
+selenium_logger = logging.getLogger(
+    "selenium.webdriver.remote.remote_connection")
+selenium_logger.setLevel(logging.WARNING)
 
 
 def load(filename):
@@ -73,11 +82,15 @@ def report(filename, results):
         if not isinstance(results[row], list):
             sheet_out.write(row, col, results[row])
         else:
-            for total, description in results[row]:
-                sheet_out.write(row, col, total)
-                col += 1
-                sheet_out.write(row, col, description)
-                col += 1
+            for result in results[row]:
+                if not isinstance(result, tuple):   # new price
+                    sheet_out.write(row, 11, result)
+                else:
+                    total, description = result
+                    sheet_out.write(row, col, total)
+                    col += 1
+                    sheet_out.write(row, col, description)
+                    col += 1
 
     workbook_out.close()
 
@@ -97,14 +110,10 @@ def calculate(params):
         page = KaskoCalcPage(driver)
         page.get(KaskoCalcPage.URL)
 
-        if params["city"] == "Москва":
-            page.city_mos.click()
-        elif params["city"] == "Санкт-Петербург":
-            page.city_sp.click()
-        elif params["city"] == "Нижний Новгород":
-            page.city_nn.click()
+        if params["city"]:
+            page.city(params["city"])
         else:
-            page.city_mos.click()
+            page.city("Москва")
 
         page.car_brand(params["car_brand"])
         page.car_model(params["car_model"])
@@ -124,8 +133,18 @@ def calculate(params):
                 page.car_mileage = int(params["car_mileage"])
 
         page.car_using_start_date = params["car_using_start_date"]
+        actual_price = None
         if params["car_price"]:
-            page.car_price = int(params["car_price"])
+            price = int(params["car_price"])
+            min_price = page.car_min_price
+            max_price = page.car_max_price
+            if price < min_price:
+                actual_price = min_price
+            elif price > max_price:
+                actual_price = max_price
+            else:
+                actual_price = price
+            page.car_price = actual_price
 
         if params["antitheft"]:
             if params["antitheft"] == "Штатная":
@@ -177,6 +196,8 @@ def calculate(params):
             result = page.errors
         else:
             result = []
+            if actual_price is not None:
+                result.append(actual_price)
             for variant in page.variants:
                 variant.click()
                 info = ';'.join((info.text for info in page.variant_info))

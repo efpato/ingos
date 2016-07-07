@@ -1,19 +1,30 @@
 # -*- coding: utf-8 -*-
 
+import logging
+from functools import wraps
+
 from page_object import PageObject, PageElements
-from page_object.elements import Button, Checkbox, Link, Select
+from page_object.elements import Button, Link, Select
 from selenium.webdriver.support.wait import WebDriverWait
 
 from elements import Label, Input
 
 
+def safe(fn):
+    @wraps(fn)
+    def wrapped(*args, **kwargs):
+        logging.debug("==> %s (args=%s, kwargs=%s)",
+                      fn.__name__, args, kwargs)
+        try:
+            fn(*args, **kwargs)
+        except:
+            logging.warning("%s --> autoselect", fn.__name__)
+
+    return wrapped
+
+
 class KaskoCalcPage(PageObject):
     URL = "https://www.ingos.ru/ru/private/auto/kasko/calc/"
-
-    city_mos = Link(id="kaskoCityMos")
-    city_sp = Link(id="kaskoCitySP")
-    city_nn = Link(id="kaskoCityNN")
-    city = Input(id="kaskoCityIsn")
 
     # Параметры автомобиля
     car_is_new = Label(css="label[for='isCarNew-Y']")
@@ -45,6 +56,32 @@ class KaskoCalcPage(PageObject):
 
     calculate = Button(id="calculateButton")
 
+    @property
+    def car_min_price(self):
+        return int(self.webdriver.execute_script(
+            "return $('input#KaskoMinCarPrice').val();"))
+
+    @property
+    def car_max_price(self):
+        return int(self.webdriver.execute_script(
+            "return $('input#KaskoMaxCarPrice').val();"))
+
+    def city(self, value):
+        def predicat(driver):
+            return "block" == driver.find_element_by_id(
+                "ui-id-1").value_of_css_property("display") and \
+                len(driver.find_elements_by_xpath(
+                    "//ul[@id='ui-id-1']/li")) > 0
+
+        self.webdriver.find_element_by_id(
+            "kaskoCityIsn").send_keys(value)
+
+        WebDriverWait(self.webdriver, 10).until(
+            predicat, "Cities list timeout expired")
+
+        self.webdriver.find_elements_by_xpath(
+            "//ul[@id='ui-id-1']/li")[0].click()
+
     def _label(self, panel_id, value):
         return Label(xpath=("//div[@id='%s']/ul/li/div/"
                             "label[contains(text(), '%s')]" %
@@ -59,53 +96,37 @@ class KaskoCalcPage(PageObject):
     def car_brand(self, value):
         self._label("CarBrandsPanel", value).click()
 
+    @safe
     def car_model(self, value):
-        try:
-            self._label("CarModelsPanel", value).click()
-        except:
-            pass
+        self._label("CarModelsPanel", value).click()
 
+    @safe
     def car_year(self, value):
-        try:
-            self._label("CarManifacturingYearsPanel", value).click()
-        except:
-            pass
+        self._label("CarManifacturingYearsPanel", value).click()
 
+    @safe
     def car_engine_model(self):
-        try:
-            self._label_avg("CarEngineModelsPanel").click()
-        except:
-            pass
+        self._label_avg("CarEngineModelsPanel").click()
 
+    @safe
     def car_modification(self):
-        try:
-            self._label_avg("CarModificationsPanel").click()
-        except:
-            pass
+        self._label_avg("CarModificationsPanel").click()
 
+    @safe
     def car_transmission_type(self, value):
-        try:
-            self._label("CarTransmissionTypesPanel", value).click()
-        except:
-            pass
+        self._label("CarTransmissionTypesPanel", value).click()
 
+    @safe
     def is_credit_car(self, value):
-        try:
-            self._label("CarIsCreditCarPanel", value).click()
-        except:
-            pass
+        self._label("CarIsCreditCarPanel", value).click()
 
+    @safe
     def car_night_parking_type(self, value):
-        try:
-            self._label("CarNightParkingTypePanel", value).click()
-        except:
-            pass
+        self._label("CarNightParkingTypePanel", value).click()
 
+    @safe
     def car_autostart(self, value):
-        try:
-            self._label("CarAutostartPanel", value).click()
-        except:
-            pass
+        self._label("CarAutostartPanel", value).click()
 
     def driver_age(self, index, value):
         return Input(css="input#KaskoDriverAge%d" % index).__set__(
