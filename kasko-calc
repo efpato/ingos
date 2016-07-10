@@ -10,7 +10,6 @@ import traceback
 import xlrd
 import xlsxwriter
 from selenium.webdriver import Firefox
-from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 
 from pages import KaskoCalcPage
 
@@ -18,9 +17,8 @@ from pages import KaskoCalcPage
 logging.basicConfig(format=("%(asctime)s  %(levelname)-8s "
                             "%(module)-15s %(message)s"),
                     level=logging.DEBUG)
-selenium_logger = logging.getLogger(
-    "selenium.webdriver.remote.remote_connection")
-selenium_logger.setLevel(logging.WARNING)
+logging.getLogger(
+    "selenium.webdriver.remote.remote_connection").setLevel(logging.WARNING)
 
 
 def load(filename):
@@ -98,12 +96,7 @@ def report(filename, results):
 def calculate(params):
     result = None
 
-    if os.getenv("DEVEL") is not None:
-        binary = FirefoxBinary("/opt/firefox-46.0.1/firefox")
-        driver = Firefox(firefox_binary=binary)
-    else:
-        driver = Firefox()
-
+    driver = Firefox()
     driver.maximize_window()
 
     try:
@@ -115,7 +108,7 @@ def calculate(params):
         else:
             page.city("Москва")
 
-        page.car_brand(params["car_brand"])
+        page.car_brand = params["car_brand"]
         page.car_model(params["car_model"])
         page.car_year(params["car_year"])
         page.car_engine_model()

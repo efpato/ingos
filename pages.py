@@ -26,6 +26,8 @@ def safe(fn):
 class KaskoCalcPage(PageObject):
     URL = "https://www.ingos.ru/ru/private/auto/kasko/calc/"
 
+    car_brand = Select(xpath="//div[@id='CarBrandsPanel']/div/select")
+
     # Параметры автомобиля
     car_is_new = Label(css="label[for='isCarNew-Y']")
     car_is_mileage = Label(css="label[for='isCarNew-N']")
@@ -68,9 +70,8 @@ class KaskoCalcPage(PageObject):
 
     def city(self, value):
         def predicat(driver):
-            return "block" == driver.find_element_by_id(
-                "ui-id-1").value_of_css_property("display") and \
-                len(driver.find_elements_by_xpath(
+            return driver.find_element_by_id("ui-id-1").value_of_css_property(
+                "display") == "block" and len(driver.find_elements_by_xpath(
                     "//ul[@id='ui-id-1']/li")) > 0
 
         self.webdriver.find_element_by_id(
@@ -83,8 +84,8 @@ class KaskoCalcPage(PageObject):
             "//ul[@id='ui-id-1']/li")[0].click()
 
     def _label(self, panel_id, value):
-        return Label(xpath=("//div[@id='%s']/ul/li/div/"
-                            "label[contains(text(), '%s')]" %
+        return Label(xpath=('//div[@id="%s"]/ul/li/div/'
+                            'label[contains(text(), "%s")]' %
                             (panel_id, value))).__get__(self, self.__class__)
 
     def _label_avg(self, panel_id):
@@ -92,9 +93,6 @@ class KaskoCalcPage(PageObject):
                               panel_id).__get__(self, self.__class__)
         index = int(round((len(labels) / 2.0)))
         return labels[index]
-
-    def car_brand(self, value):
-        self._label("CarBrandsPanel", value).click()
 
     @safe
     def car_model(self, value):
@@ -168,14 +166,15 @@ class KaskoCalcPage(PageObject):
 
     def wait_hide_loader(self):
         WebDriverWait(self.webdriver, 10).until(
-            lambda driver: "none" == driver.find_element_by_id(
-                "carAdditionalDataSpinner").value_of_css_property("display"),
+            lambda driver: driver.find_element_by_id(
+                "carAdditionalDataSpinner").value_of_css_property(
+                    "display") == "none",
             "Loader timeout expired")
 
     def wait_calculation(self):
         WebDriverWait(self.webdriver, 10).until(
-            lambda driver: "none" == driver.find_element_by_id(
-                "spinnerStep1").value_of_css_property("display"),
+            lambda driver: driver.find_element_by_id(
+                "spinnerStep1").value_of_css_property("display") == "none",
             "Calculation timeout expired")
 
     @property
