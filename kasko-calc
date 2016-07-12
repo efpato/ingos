@@ -204,7 +204,7 @@ def calculate(params):
         result = "%r" % value
         traceback.print_exception(etype, value, tb)
     finally:
-        driver.close()
+        driver.quit()
 
     return result
 
