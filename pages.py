@@ -100,7 +100,27 @@ class KaskoCalcPage(PageObject):
 
     @safe
     def car_year(self, value):
-        self._label("CarManifacturingYearsPanel", value).click()
+        if value:
+            value = int(value)
+
+            labels = PageElements(
+                xpath=('//div[@id="CarManifacturingYearsPanel"]'
+                       '/ul/li/div/label')).__get__(self, self.__class__)
+            years = [int(label.text) for label in labels]
+
+            for i, year in enumerate(years):
+                if value == year:
+                    labels[i].click()
+                    return
+
+            min_year = min(years)
+            max_year = max(years)
+            if value < min_year:
+                labels[years.index(min_year)].click()
+            elif value > max_year:
+                labels[years.index(max_year)].click()
+            else:
+                raise ValueError("Couldn't resolve year: %s" % value)
 
     @safe
     def car_engine_model(self):

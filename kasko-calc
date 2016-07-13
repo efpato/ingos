@@ -4,6 +4,7 @@
 import logging
 import optparse
 import os
+import signal
 import sys
 import traceback
 from time import sleep
@@ -78,29 +79,31 @@ def report(filename, results):
             sheet_out.write(row, col, sheet_in.cell_value(row, col))
 
         col = sheet_in.ncols
-        if not isinstance(results[row], list):
-            sheet_out.write(row, col, results[row])
-        else:
-            for result in results[row]:
-                if not isinstance(result, tuple):   # new price
-                    sheet_out.write(row, 11, result)
-                else:
-                    total, description = result
-                    sheet_out.write(row, col, total)
-                    col += 1
-                    sheet_out.write(row, col, description)
-                    col += 1
+        if row < len(results):
+            if not isinstance(results[row], list):
+                sheet_out.write(row, col, results[row])
+            else:
+                for result in results[row]:
+                    if not isinstance(result, tuple):   # new price
+                        sheet_out.write(row, 11, result)
+                    else:
+                        total, description = result
+                        sheet_out.write(row, col, total)
+                        col += 1
+                        sheet_out.write(row, col, description)
+                        col += 1
 
     workbook_out.close()
 
 
 def calculate(params):
     result = None
-
-    driver = Firefox()
-    driver.maximize_window()
+    driver = None
 
     try:
+        driver = Firefox()
+        driver.maximize_window()
+
         page = KaskoCalcPage(driver)
         page.get(KaskoCalcPage.URL)
 
@@ -204,12 +207,24 @@ def calculate(params):
         result = "%r" % value
         traceback.print_exception(etype, value, tb)
     finally:
-        driver.quit()
+        if driver is not None:
+            driver.quit()
 
     return result
 
 
+stopped = False
+
+
 def main():
+    def sigint_handler(signum, frame):
+        global stopped
+
+        logging.info("Got signal: signum=%d, frame=%s", signum, frame)
+        stopped = True
+
+    signal.signal(signal.SIGINT, sigint_handler)
+
     parser = optparse.OptionParser(usage="%prog <file>")
     _, args = parser.parse_args()
 
@@ -228,6 +243,8 @@ def main():
                 ("Вариант 5", "Описание 5"),
                 ("Вариант 6", "Описание 6")]]
     for data in load(filename):
+        if stopped:
+            break
         results.append(calculate(data))
 
     report(filename, results)

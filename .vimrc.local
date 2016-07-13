@@ -1,1 +1,1 @@
-let g:syntastic_python_pylint_post_args = '-d W0702,R0904,R0912,R0915,R0204,W0402,R0903'
+let g:syntastic_python_pylint_post_args = '-d W0702,W0603,R0904,R0912,R0915,R0204,W0402,R0903'
