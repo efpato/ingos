@@ -10,6 +10,9 @@ from selenium.webdriver.support.wait import WebDriverWait
 from elements import Label, Input
 
 
+WAIT_TIMEOUT = 20
+
+
 def safe(fn):
     @wraps(fn)
     def wrapped(*args, **kwargs):
@@ -185,14 +188,14 @@ class KaskoCalcPage(PageObject):
                      index).__get__(self, self.__class__)
 
     def wait_hide_loader(self):
-        WebDriverWait(self.webdriver, 10).until(
+        WebDriverWait(self.webdriver, WAIT_TIMEOUT).until(
             lambda driver: driver.find_element_by_id(
                 "carAdditionalDataSpinner").value_of_css_property(
                     "display") == "none",
             "Loader timeout expired")
 
     def wait_calculation(self):
-        WebDriverWait(self.webdriver, 10).until(
+        WebDriverWait(self.webdriver, WAIT_TIMEOUT).until(
             lambda driver: driver.find_element_by_id(
                 "spinnerStep1").value_of_css_property("display") == "none",
             "Calculation timeout expired")
