@@ -22,8 +22,9 @@ PAGE_LOAD_TIMEOUT = 60
 logging.basicConfig(format=("%(asctime)s  %(levelname)-8s "
                             "%(module)-15s %(message)s"),
                     level=logging.DEBUG)
-logging.getLogger(
-    "selenium.webdriver.remote.remote_connection").setLevel(logging.WARNING)
+logging.getLogger('selenium').setLevel(logging.DEBUG)
+# logging.getLogger(
+#     "selenium.webdriver.remote.remote_connection").setLevel(logging.WARNING)
 
 
 def load(filename):
