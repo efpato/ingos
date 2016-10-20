@@ -22,9 +22,9 @@ PAGE_LOAD_TIMEOUT = 60
 logging.basicConfig(format=("%(asctime)s  %(levelname)-8s "
                             "%(module)-15s %(message)s"),
                     level=logging.DEBUG)
-logging.getLogger('selenium').setLevel(logging.DEBUG)
-# logging.getLogger(
-#     "selenium.webdriver.remote.remote_connection").setLevel(logging.WARNING)
+# level=logging.DEBUG)logging.getLogger('selenium').setLevel(logging.DEBUG)
+logging.getLogger(
+    "selenium.webdriver.remote.remote_connection").setLevel(logging.WARNING)
 
 
 def load(filename):
@@ -130,8 +130,8 @@ def calculate(params):
 
         sleep(2)    # Wait options load
         page.car_brand = params["car_brand"]
-        page.car_model(params["car_model"])
         page.car_year(params["car_year"])
+        page.car_model(params["car_model"])
         page.car_engine_model()
         page.car_modification()
         page.car_transmission_type(params["car_transmission_type"])
