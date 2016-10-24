@@ -22,7 +22,6 @@ PAGE_LOAD_TIMEOUT = 60
 logging.basicConfig(format=("%(asctime)s  %(levelname)-8s "
                             "%(module)-15s %(message)s"),
                     level=logging.DEBUG)
-# level=logging.DEBUG)logging.getLogger('selenium').setLevel(logging.DEBUG)
 logging.getLogger(
     "selenium.webdriver.remote.remote_connection").setLevel(logging.WARNING)
 
@@ -135,9 +134,6 @@ def calculate(params):
         page.car_engine_model()
         page.car_modification()
         page.car_transmission_type(params["car_transmission_type"])
-        page.is_credit_car(params["is_credit_car"])
-        page.car_night_parking_type(params["car_night_parking_type"])
-        page.car_autostart(params["car_autostart"])
 
         if params["car_is_new"]:
             if params["car_is_new"] == "Новый":
@@ -147,6 +143,11 @@ def calculate(params):
                 page.car_mileage = int(params["car_mileage"])
 
         page.car_using_start_date = params["car_using_start_date"]
+
+        page.car_night_parking_type(params["car_night_parking_type"])
+        page.is_credit_car(params["is_credit_car"])
+        page.car_autostart(params["car_autostart"])
+
         actual_price = None
         if params["car_price"]:
             price = int(params["car_price"])

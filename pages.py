@@ -36,6 +36,12 @@ class KaskoCalcPage(PageObject):
     car_is_mileage = Label(css="label[for='isCarNew-N']")
     car_mileage = Input(css="input#carMileage")
     car_using_start_date = Input(css="input#KaskoCarUsingStartDate")
+    car_night_parking_type_1 = Label(css="label[for='night1']")
+    car_night_parking_type_2 = Label(css="label[for='night2']")
+    is_credit_car_yes = Label(css="label[for='credit-y']")
+    is_credit_car_no = Label(css="label[for='credit-n']")
+    car_autostart_yes = Label(css="label[for='auto-y']")
+    car_autostart_no = Label(css="label[for='auto-n']")
     car_price = Input(css="input#KaskoAvgCarPrice")
     antitheft_included = Label(css="label[for='antitheft1']")
     antitheft_other = Label(css="label[for='antitheft2']")
@@ -137,17 +143,38 @@ class KaskoCalcPage(PageObject):
     def car_transmission_type(self, value):
         self._label("CarTransmissionTypesPanel", value).click()
 
-    @safe
     def is_credit_car(self, value):
-        self._label("CarIsCreditCarPanel", value).click()
+        if value:
+            value = str(value).strip()
+            if value.lower() == "да":
+                self.is_credit_car_yes.click()
+            elif value.lower() == "нет":
+                self.is_credit_car_no.click()
+            else:
+                raise RuntimeError(
+                    'Invalid value for "is_credit_car": "%s"' % value)
 
-    @safe
     def car_night_parking_type(self, value):
-        self._label("CarNightParkingTypePanel", value).click()
+        if value:
+            value = str(value).strip()
+            if value == "Охраняемая стоянка / Гараж":
+                self.car_night_parking_type_1.click()
+            elif value == "Иное":
+                self.car_night_parking_type_2.click()
+            else:
+                raise RuntimeError(
+                    'Invalid value for "car_night_parking_type": "%s"' % value)
 
-    @safe
     def car_autostart(self, value):
-        self._label("CarAutostartPanel", value).click()
+        if value:
+            value = str(value).strip()
+            if value.lower() == "да":
+                self.car_autostart_yes.click()
+            elif value.lower() == "нет":
+                self.car_autostart_no.click()
+            else:
+                raise RuntimeError(
+                    'Invalid value for "car_autostart": "%s"' % value)
 
     def driver_age(self, index, value):
         return Input(css="input#KaskoDriverAge%d" % index).__set__(
