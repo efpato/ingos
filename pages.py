@@ -247,9 +247,8 @@ class KaskoCalcPage(PageObject):
 
     @property
     def result(self):
-        value = self.webdriver.find_element_by_id(
+        return self.webdriver.find_element_by_id(
             "kaskoBottomResultProductDescription").text.split(':')[1]
-        return float(value.replace(' ', '').replace(',', '.'))
 
     @property
     def errors(self):
