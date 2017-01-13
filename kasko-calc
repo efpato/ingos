@@ -11,11 +11,12 @@ from time import sleep
 
 import xlrd
 import xlsxwriter
+from page_object import PageElement
 from selenium.webdriver import Firefox
 
 from pages import KaskoCalcPage
 
-
+PageElement.TIMEOUT = 60
 PAGE_LOAD_TIMEOUT = 60
 
 
@@ -127,7 +128,7 @@ def calculate(params):
         else:
             page.city("Москва")
 
-        sleep(2)    # Wait options load
+        sleep(3)    # Wait options load
         page.car_brand = params["car_brand"]
         page.car_year(params["car_year"])
         page.car_model(params["car_model"])
@@ -214,6 +215,9 @@ def calculate(params):
             if actual_price is not None:
                 result.append(actual_price)
             for variant in page.variants:
+                if not variant.is_displayed():
+                    page.next_variant()
+                    sleep(3)
                 variant.click()
                 info = ';'.join((info.text for info in page.variant_info))
                 if page.has_franchise:
@@ -255,12 +259,7 @@ def main():
     if not os.path.exists(filename):
         parser.error("File '%s' not exists" % filename)
 
-    results = [[("Вариант 1", "Описание 1"),
-                ("Вариант 2", "Описание 2"),
-                ("Вариант 3", "Описание 3"),
-                ("Вариант 4", "Описание 4"),
-                ("Вариант 5", "Описание 5"),
-                ("Вариант 6", "Описание 6")]]
+    results = ['']
     for data in load(filename):
         if stopped:
             break

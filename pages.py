@@ -10,7 +10,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 from elements import Label, Input
 
 
-WAIT_TIMEOUT = 20
+WAIT_TIMEOUT = 60
 
 
 def safe(fn):
@@ -255,3 +255,6 @@ class KaskoCalcPage(PageObject):
         errors = self.webdriver.find_elements_by_xpath(
             "//ul[@class='errors-list']/li")
         return "\n".join([error.text for error in errors])
+
+    def next_variant(self):
+        self.webdriver.execute_script("$('a.flex-next').click();")
