@@ -16,7 +16,7 @@ from selenium.webdriver import Firefox
 
 from pages import KaskoCalcPage
 
-PageElement.TIMEOUT = 60
+PageElement.TIMEOUT = 20
 PAGE_LOAD_TIMEOUT = 60
 
 
