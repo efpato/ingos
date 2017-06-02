@@ -214,6 +214,17 @@ class KaskoCalcPage(PageObject):
                             "and @value='1']/../label") %
                      index).__get__(self, self.__class__)
 
+    def installment(self, value):
+        if not str(value):
+            return
+
+        try:
+            Label(css="label[for='once{}']".format(
+                1 if value == "Единовременно" else 2)).__get__(
+                    self, self.__class__).click()
+        except Exception as e:
+            logging.warning(e)
+
     def wait_hide_loader(self):
         WebDriverWait(self.webdriver, WAIT_TIMEOUT).until(
             lambda driver: driver.find_element_by_id(
@@ -248,7 +259,7 @@ class KaskoCalcPage(PageObject):
     @property
     def result(self):
         return self.webdriver.find_element_by_id(
-            "kaskoBottomResultProductDescription").text.split(':')[1]
+            "kaskoTopResultProductDescription").text
 
     @property
     def errors(self):

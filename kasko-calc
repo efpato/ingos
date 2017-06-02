@@ -65,7 +65,8 @@ def load(filename):
                 "driver_is_married": str(
                     sheet.cell_value(row, 22)).split(';'),
                 "date_begin": sheet.cell_value(row, 23),
-                "discount_sizepj": sheet.cell_value(row, 24)
+                "discount_sizepj": sheet.cell_value(row, 24),
+                "installment": sheet.cell_value(row, 25)
             })
 
     logging.debug('Data has been loaded (%d rows)', len(data))
@@ -219,10 +220,13 @@ def calculate(params):
                     page.next_variant()
                     sleep(3)
                 variant.click()
-                info = ';'.join((info.text for info in page.variant_info))
+                page.installment(params["installment"])
+                info, total = page.result.split(':')
+                info += ';'
+                info += ';'.join((info.text for info in page.variant_info))
                 if page.has_franchise:
                     info += ";Франшиза: %s" % page.franchise_value
-                result.append((page.result, info))
+                result.append((total, info))
     except:
         etype, value, tb = sys.exc_info()
         result = "%r" % value
