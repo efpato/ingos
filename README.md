@@ -5,7 +5,8 @@ ingos-kasko-calc
 
 #Настройка локальной машины для запуска скрипта
  
- 1. Установить Firefox
+ 1. Установить Google Chrome
+ 2. Скачать последнюю версию chromedriver (https://sites.google.com/a/chromium.org/chromedriver/downloads) и положить в C:\Windows
  2. Установить Python (https://www.python.org/downloads/release/python-342/)
  3. Прописать в переменную окружения PATH к установленному каталогу с python.exe (по умолчанию это C:\Python34\) и добавить путь к C:\Python34\Scripts
  4. Установить git-клиента https://git-scm.com/downloads

@@ -78,19 +78,20 @@ class KaskoCalcPage(PageObject):
             "return $('input#KaskoMaxCarPrice').val();"))
 
     def city(self, value):
-        def predicat(driver):
-            return driver.find_element_by_id("ui-id-1").value_of_css_property(
-                "display") == "block" and len(driver.find_elements_by_xpath(
-                    "//ul[@id='ui-id-1']/li")) > 0
-
-        self.webdriver.find_element_by_id(
-            "kaskoCityIsn").send_keys(value)
-
-        WebDriverWait(self.webdriver, 10).until(
-            predicat, "Cities list timeout expired")
-
-        self.webdriver.find_elements_by_xpath(
-            "//ul[@id='ui-id-1']/li")[0].click()
+        self.webdriver.execute_script(
+            """
+            var element = $("input#kaskoCityIsn");
+            element.val('%s').keyup().autocomplete("search", element.val());
+            setTimeout(function () {
+                element.autocomplete("widget")
+                    .trigger($.Event("keydown", {
+                        keyCode: $.ui.keyCode.DOWN
+                    }))
+                    .trigger($.Event("keydown", {
+                        keyCode: $.ui.keyCode.ENTER
+                    }));
+            }, 1000);
+            """ % value)
 
     def _label(self, panel_id, value):
         return Label(xpath=('//div[@id="%s"]/ul/li/div/'

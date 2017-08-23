@@ -12,7 +12,7 @@ from time import sleep
 import xlrd
 import xlsxwriter
 from page_object import PageElement
-from selenium.webdriver import Firefox
+from selenium.webdriver import Chrome
 
 from pages import KaskoCalcPage
 
@@ -113,9 +113,9 @@ def calculate(params):
     driver = None
 
     try:
-        driver = Firefox()
+        driver = Chrome()
         driver.maximize_window()
-        logging.debug('Firefox started')
+        logging.debug('Chrome started')
 
         driver.set_page_load_timeout(PAGE_LOAD_TIMEOUT)
         logging.debug('Set page_load_timeout=%d', PAGE_LOAD_TIMEOUT)
