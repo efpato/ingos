@@ -2,6 +2,7 @@
 
 import logging
 from functools import wraps
+from time import sleep
 
 from page_object import PageObject, PageElements
 from page_object.elements import Button, Link, Select
@@ -90,8 +91,9 @@ class KaskoCalcPage(PageObject):
                     .trigger($.Event("keydown", {
                         keyCode: $.ui.keyCode.ENTER
                     }));
-            }, 1000);
+            }, 3000);
             """ % value)
+        sleep(3)
 
     def _label(self, panel_id, value):
         return Label(xpath=('//div[@id="%s"]/ul/li/div/'
