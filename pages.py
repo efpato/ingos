@@ -221,10 +221,10 @@ class KaskoCalcPage(PageObject):
         if not str(value):
             return
 
+        locator = "label[for='once%d']" % 1 if value == "Единовременно" else 2
         try:
-            Label(css="label[for='once{}']".format(
-                1 if value == "Единовременно" else 2)).__get__(
-                    self, self.__class__).click()
+            Label(css=locator).__get__(self, self.__class__)
+            self.webdriver.execute_script('$("%s").click();' % locator)
         except Exception as e:
             logging.warning(e)
 

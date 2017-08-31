@@ -219,7 +219,8 @@ def calculate(params):
                 if not variant.is_displayed():
                     page.next_variant()
                     sleep(3)
-                variant.click()
+                page.webdriver.execute_script(
+                    'arguments[0].click();', variant)
                 page.installment(params["installment"])
                 info, total = page.result.split(':')
                 info += ';'
