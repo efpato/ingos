@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 
 from page_object import PageElement
-from page_object.elements import Link
 
 
-Label = Link
+class ButtonElement(object):
+    def __init__(self, webelement):
+        self.el = webelement
+
+    def click(self):
+        self.el.parent.execute_script("arguments[0].click();", self.el)
 
 
 class Input(PageElement):
@@ -16,3 +20,8 @@ class Input(PageElement):
                 instance.webdriver.execute_script(
                     """$("{0}").val("{1}").change();"""
                     .format(self._locator[1], value))
+
+
+class Label(PageElement):
+    def __get__(self, instance, owner):
+        return ButtonElement(super().__get__(instance, owner))

@@ -5,7 +5,7 @@ from functools import wraps
 from time import sleep
 
 from page_object import PageObject, PageElements
-from page_object.elements import Button, Link, Select
+from page_object.elements import Link, Select
 from selenium.webdriver.support.wait import WebDriverWait
 
 from elements import Label, Input
@@ -66,7 +66,7 @@ class KaskoCalcPage(PageObject):
     # Расчет скидки
     discount_sizepj = Label(css="label[for='TP_DISCOUNTSIZEPJ']")
 
-    calculate = Button(id="calculateButton")
+    calculate = Label(id="calculateButton")
 
     @property
     def car_min_price(self):
