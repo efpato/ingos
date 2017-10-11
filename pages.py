@@ -229,17 +229,22 @@ class KaskoCalcPage(PageObject):
             logging.warning(e)
 
     def wait_hide_loader(self):
-        WebDriverWait(self.webdriver, WAIT_TIMEOUT).until(
+        WebDriverWait(self.webdriver, WAIT_TIMEOUT).until_not(
             lambda driver: driver.find_element_by_id(
-                "carAdditionalDataSpinner").value_of_css_property(
-                    "display") == "none",
+                "carAdditionalDataSpinner").is_displayed(),
             "Loader timeout expired")
 
     def wait_calculation(self):
-        WebDriverWait(self.webdriver, WAIT_TIMEOUT).until(
+        WebDriverWait(self.webdriver, WAIT_TIMEOUT).until_not(
             lambda driver: driver.find_element_by_id(
-                "spinnerStep1").value_of_css_property("display") == "none",
+                "spinnerStep1").is_displayed(),
             "Calculation timeout expired")
+
+    def wait_calculation_update(self):
+        WebDriverWait(self.webdriver, WAIT_TIMEOUT).until_not(
+            lambda driver: driver.find_element_by_id(
+                "calculationUpdateSpinner").is_displayed(),
+            "Calculation update timeout expired")
 
     @property
     def has_franchise(self):

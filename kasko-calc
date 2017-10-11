@@ -222,6 +222,7 @@ def calculate(params):
                 page.webdriver.execute_script(
                     'arguments[0].click();', variant)
                 page.installment(params["installment"])
+                page.wait_calculation_update()
                 info, total = page.result.split(':')
                 info += ';'
                 info += ';'.join((info.text for info in page.variant_info))
