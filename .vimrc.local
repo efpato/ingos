@@ -1,3 +1,7 @@
 let g:neomake_python_pylint_args +=
-  \ ['-d', 'W0702,W0603,R0904,R0912,R0915,R0204,W0402,R0903,W0703'
+  \ ['-d', 'bare-except,
+  \         too-few-public-methods,
+  \         too-many-branches,
+  \         too-many-locals,
+  \         too-many-statements'
   \ ]

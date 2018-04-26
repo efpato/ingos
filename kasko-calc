@@ -8,16 +8,17 @@ import signal
 import sys
 import traceback
 from time import sleep
+from datetime import date
 
 import xlrd
 import xlsxwriter
-from page_object import PageElement
 from selenium.webdriver import Chrome
 
 from pages import KaskoCalcPage
+from elements import AVG
 
-PageElement.TIMEOUT = 20
-PAGE_LOAD_TIMEOUT = 60
+
+PAGE_LOAD_TIMEOUT = 180
 
 
 logging.basicConfig(format=("%(asctime)s  %(levelname)-8s "
@@ -39,34 +40,25 @@ def load(filename):
                 "city": sheet.cell_value(row, 0),
                 "car_brand": sheet.cell_value(row, 1),
                 "car_model": sheet.cell_value(row, 2),
-                "car_year": sheet.cell_value(row, 3),
+                "car_year": int(sheet.cell_value(row, 3)),
                 "car_transmission_type": sheet.cell_value(row, 4),
-                "is_credit_car": sheet.cell_value(row, 5),
-                "car_night_parking_type": sheet.cell_value(row, 6),
-                "car_autostart": sheet.cell_value(row, 7),
-                "car_is_new": sheet.cell_value(row, 8),
-                "car_mileage": sheet.cell_value(row, 9),
-                "car_using_start_date": sheet.cell_value(row, 10),
-                "car_price": sheet.cell_value(row, 11),
-                "antitheft": sheet.cell_value(row, 12),
-                "insure_additional_equipment": sheet.cell_value(row, 13),
-                "audio_equipment_sum": sheet.cell_value(row, 14),
-                "other_equipment_sum": sheet.cell_value(row, 15),
-                "multi_drive": sheet.cell_value(row, 16),
-                "multi_drive_light": sheet.cell_value(row, 17),
+                "is_credit_car": str(sheet.cell_value(row, 5)).lower() == "да",
+                "car_autostart": str(sheet.cell_value(row, 6).lower()) == "да",
+                "car_is_new": sheet.cell_value(row, 7),
+                "car_mileage": sheet.cell_value(row, 8),
+                "car_start_using_date": sheet.cell_value(row, 9),
+                "car_price": int(sheet.cell_value(row, 10)),
+                "antitheft_system": sheet.cell_value(row, 11),
                 "driver_age": str(
-                    sheet.cell_value(row, 18)).split(';'),
-                "driver_experience_years": str(
-                    sheet.cell_value(row, 19)).split(';'),
+                    sheet.cell_value(row, 12)).split(';'),
+                "driver_experience": str(
+                    sheet.cell_value(row, 13)).split(';'),
                 "driver_sex": str(
-                    sheet.cell_value(row, 20)).split(';'),
+                    sheet.cell_value(row, 14)).split(';'),
                 "driver_has_children": str(
-                    sheet.cell_value(row, 21)).split(';'),
+                    sheet.cell_value(row, 15)).split(';'),
                 "driver_is_married": str(
-                    sheet.cell_value(row, 22)).split(';'),
-                "date_begin": sheet.cell_value(row, 23),
-                "discount_sizepj": sheet.cell_value(row, 24),
-                "installment": sheet.cell_value(row, 25)
+                    sheet.cell_value(row, 16)).split(';')
             })
 
     logging.debug('Data has been loaded (%d rows)', len(data))
@@ -94,7 +86,7 @@ def report(filename, results):
             else:
                 for result in results[row]:
                     if not isinstance(result, tuple):   # new price
-                        sheet_out.write(row, 11, result)
+                        sheet_out.write(row, 10, result)
                     else:
                         total, description = result
                         sheet_out.write(row, col, total)
@@ -125,110 +117,87 @@ def calculate(params):
         page.get(KaskoCalcPage.URL)
 
         if params["city"]:
-            page.city(params["city"])
+            page.city = params["city"]
         else:
-            page.city("Москва")
+            page.city = "Москва"
 
-        sleep(3)    # Wait options load
         page.car_brand = params["car_brand"]
-        page.car_year(params["car_year"])
-        page.car_model(params["car_model"])
-        page.car_engine_model()
-        page.car_modification()
-        page.car_transmission_type(params["car_transmission_type"])
 
-        if params["car_is_new"]:
-            if params["car_is_new"] == "Новый":
-                page.car_is_new.click()
-            elif params["car_is_new"] == "С пробегом":
-                page.car_is_mileage.click()
-                page.car_mileage = int(params["car_mileage"])
-
-        page.car_using_start_date = params["car_using_start_date"]
-
-        page.car_night_parking_type(params["car_night_parking_type"])
-        page.is_credit_car(params["is_credit_car"])
-        page.car_autostart(params["car_autostart"])
-
-        actual_price = None
-        if params["car_price"]:
-            price = int(params["car_price"])
-            min_price = page.car_min_price
-            max_price = page.car_max_price
-            if price < min_price:
-                actual_price = min_price
-            elif price > max_price:
-                actual_price = max_price
-            else:
-                actual_price = price
-            page.car_price = actual_price
-
-        if params["antitheft"]:
-            if params["antitheft"] == "Штатная":
-                page.antitheft_included.click()
-            else:
-                page.antitheft_other.click()
-                page.wait_hide_loader()
-                page.antitheft_system_models = params["antitheft"]
-
-        if params["insure_additional_equipment"] == "Да":
-            page.insure_additional_equipment.click()
-            page.audio_equipment_sum = int(params["audio_equipment_sum"])
-            page.other_equipment_sum = int(params["other_equipment_sum"])
-
-        if params["multi_drive"] == "Да":
-            page.multi_drive.click()
-        if params["multi_drive_light"] == "Да":
-            page.multi_drive_light.click()
-        if params["multi_drive"] != "Да" and \
-                params["multi_drive_light"] != "Да":
-            for i in range(len(params["driver_age"])):
-                if i > 0:
-                    page.add_usage_driver.click()
-                page.driver_age(i, int(float(params["driver_age"][i])))
-                page.driver_experience_years(
-                    i, int(float(params["driver_experience_years"][i])))
-                if params["driver_sex"][i] == "Мужской":
-                    page.driver_sex_male(i).click()
-                elif params["driver_sex"][i] == "Женский":
-                    page.driver_sex_female(i).click()
-                if params["driver_has_children"][i] == "Да":
-                    page.driver_has_children_yes(i).click()
-                elif params["driver_has_children"][i] == "Нет":
-                    page.driver_has_children_no(i).click()
-                if params["driver_is_married"][i] == "Да":
-                    page.driver_is_married_yes(i).click()
-                elif params["driver_is_married"][i] == "Нет":
-                    page.driver_is_married_no(i).click()
-
-        page.date_begin = params["date_begin"]
-
-        if params["discount_sizepj"] == "Да":
-            page.discount_sizepj.click()
-
-        page.calculate.click()
-        page.wait_calculation()
-
-        if page.errors:
-            result = page.errors
+        year = date.today().year
+        if params["car_year"] < year - 10:
+            page.car_year = year - 10
+        elif params["car_year"] > year:
+            page.car_year = year
         else:
-            result = []
-            if actual_price is not None:
-                result.append(actual_price)
-            for variant in page.variants:
-                if not variant.is_displayed():
-                    page.next_variant()
-                    sleep(3)
-                page.webdriver.execute_script(
-                    'arguments[0].click();', variant)
-                page.installment(params["installment"])
-                page.wait_calculation_update()
-                info, total = page.result.split(':')
-                info += ';'
-                info += ';'.join((info.text for info in page.variant_info))
-                if page.has_franchise:
-                    info += ";Франшиза: %s" % page.franchise_value
-                result.append((total, info))
+            page.car_year = params["car_year"]
+
+        page.car_model = params["car_model"]
+        page.car_transmission_type = params["car_transmission_type"]
+        page.car_engine_type = AVG
+        page.car_modification = AVG
+        page.car_engine_model = AVG
+
+        if params["car_is_new"] == "Новый":
+            page.car_mileage = "Меньше 200 км"
+            page.car_is_new = "Новый/куплен менее месяца назад"
+        elif params["car_is_new"] == "С пробегом":
+            value = int(params["car_mileage"])
+            if value > 30000:
+                page.car_mileage = "Больше 30 000 км"
+            elif 20000 < value <= 30000:
+                page.car_mileage = "От 20 000 км до 30 000 км"
+            elif 15000 < value <= 20000:
+                page.car_mileage = "От 15 000 км до 20 000 км"
+            elif 200 <= value <= 15000:
+                page.car_mileage = "От 200 км до 15 000 км"
+            elif value < 200:
+                page.car_mileage = "Меньше 200 км"
+                page.car_is_new = "Неновый/куплен более месяца назад"
+
+        page.antitheft_system = params["antitheft_system"]
+
+        if params["car_autostart"]:
+            page.car_autostart = "Установлен автозапуск"
+        else:
+            page.car_autostart = "Без автозапуска"
+
+        if params["is_credit_car"]:
+            page.is_credit_car = "Да. Выплачиваю кредит."
+        else:
+            page.is_credit_car = "Нет, не в кредите."
+
+        for i in range(len(params["driver_age"])):
+            if i > 0:
+                page.add_driver.click()
+            page.driver_age = params["driver_age"][i]
+            page.driver_experience = params["driver_experience"][i]
+            page.driver_sex = params["driver_sex"][i]
+            page.driver_is_married = params["driver_is_married"][i]
+            page.driver_has_children = params["driver_has_children"][i]
+
+        page.car_start_using_date = params["car_start_using_date"]
+        page.car_price = params["car_price"]
+        sleep(1)
+        actual_price = page.car_price.value
+
+        page.calculate.move_to_self()
+        page.calculate.click()
+        page.cover_type.wait_for_visibility(60)
+
+        result = [actual_price]
+        variants = filter(lambda v: v["CoverTypeName"] == "Угон + ущерб",
+                          page.variants.variants)
+        for variant in variants:
+            total = variant["PremiumSumNum"]
+            franchise = variant["FranchInfo"]
+            repair = variant["RepairTypeInfo"]
+            info = ';'.join((
+                variant["CoverTypeName"],
+                "Франшиза: %s %s" % (franchise["FranchiseTypeName"],
+                                     franchise["FranchiseValue"]),
+                repair["RepairTypeName"]
+            ))
+            result.append((total, info))
     except:
         etype, value, tb = sys.exc_info()
         result = "%r" % value
