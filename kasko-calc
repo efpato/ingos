@@ -175,14 +175,19 @@ def calculate(params):
             page.driver_is_married = params["driver_is_married"][i]
             page.driver_has_children = params["driver_has_children"][i]
 
-        page.car_start_using_date = params["car_start_using_date"]
-        page.car_price = params["car_price"]
-        sleep(1)
-        actual_price = page.car_price.value
+        try:
+            page.car_start_using_date = params["car_start_using_date"]
+            page.car_price = params["car_price"]
+            sleep(1)
+            actual_price = page.car_price.value
+        except:
+            page.car_price2 = params["car_price"]
+            sleep(1)
+            actual_price = page.car_price2.value
 
         page.calculate.move_to_self()
         page.calculate.click()
-        page.cover_type.wait_for_visibility(60)
+        page.wait_for_calculate()
 
         result = [actual_price]
         variants = filter(lambda v: v["CoverTypeName"] == "Угон + ущерб",

@@ -125,8 +125,6 @@ class VariantsSliderWrapper(PageElementWrapper):
             """
             return $("{}").scope().$parent.kcc.calculationResults;
             """.format(self._locator[1]))
-#         return self._el.find_elements_by_xpath(
-#             ".//div[contains(@class, 'value-slider__slider')]/span")
 
 
 class VariantsSlider(PageElement):

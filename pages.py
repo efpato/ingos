@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
 
 from page_object import PageObject
-from page_object.ui import Button, Link, Select
+from page_object.ui import Button, Link
 from page_object.ui.jquery import Textbox
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.wait import WebDriverWait
 
 from elements import MultySelectTextbox, SearchTextbox, Slider, VariantsSlider
 
@@ -36,6 +39,12 @@ class KaskoCalcPage(PageObject):
     car_start_using_date = Textbox(
         css="div[ng-model='vm.CarParams.StartUsingDate'] input")
     car_price = Slider(css="div[ng-model='vm.SumSlider.value'] input")
+    car_price2 = Textbox(css="input[name='price']")
     calculate = Button(css="button[ng-model='vm.isSubmitting']")
-    cover_type = Select(id="kaskoCalculationCoverTypeSelect")
     variants = VariantsSlider(css="div[ng-model='kcc.selectedVariantNumber']")
+
+    def wait_for_calculate(self, timeout=180):
+        WebDriverWait(self.webdriver, timeout).until(
+            EC.visibility_of_element_located((
+                By.ID, "kaskoCalculationCoverTypeSelect")),
+            'Calculation timeout is expired!')
