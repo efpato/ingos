@@ -137,22 +137,7 @@ def calculate(params):
         page.car_modification = AVG
         page.car_engine_model = AVG
 
-        if params["car_is_new"] == "Новый":
-            page.car_mileage = "Меньше 200 км"
-            page.car_is_new = "Новый/куплен менее месяца назад"
-        elif params["car_is_new"] == "С пробегом":
-            value = int(params["car_mileage"])
-            if value > 30000:
-                page.car_mileage = "Больше 30 000 км"
-            elif 20000 < value <= 30000:
-                page.car_mileage = "От 20 000 км до 30 000 км"
-            elif 15000 < value <= 20000:
-                page.car_mileage = "От 15 000 км до 20 000 км"
-            elif 200 <= value <= 15000:
-                page.car_mileage = "От 200 км до 15 000 км"
-            elif value < 200:
-                page.car_mileage = "Меньше 200 км"
-                page.car_is_new = "Неновый/куплен более месяца назад"
+        page.car_mileage(int(params["car_mileage"]))
 
         page.antitheft_system = params["antitheft_system"]
 

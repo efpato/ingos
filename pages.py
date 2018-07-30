@@ -23,7 +23,6 @@ class KaskoCalcPage(PageObject):
     car_engine_type = MultySelectTextbox(css=car_fmt("Тип двигателя"))
     car_modification = MultySelectTextbox(css=car_fmt("Тип кузова"))
     car_engine_model = MultySelectTextbox(css=car_fmt("Двигатель"))
-    car_mileage = MultySelectTextbox(css=car_fmt("Текущий пробег"))
     car_is_new = MultySelectTextbox(css=car_fmt(
         "Дата покупки первым собственником"))
     antitheft_system = MultySelectTextbox(css=car_fmt(
@@ -42,6 +41,21 @@ class KaskoCalcPage(PageObject):
     car_price2 = Textbox(css="input[name='price']")
     calculate = Button(css="button[ng-model='vm.isSubmitting']")
     variants = VariantsSlider(css="div[ng-model='kcc.selectedVariantNumber']")
+
+    def car_mileage(self, value):
+        if value is None:
+            return
+
+        value = str(value).strip().lower()
+        if not value:
+            return
+
+        self.webdriver.execute_script(
+            """
+            var e = $("input[ng-model='vm.cxFormInputValue']");
+            e.val({0}).change();
+            e.next().next().click();
+            """.format(value))
 
     def wait_for_calculate(self, timeout=180):
         WebDriverWait(self.webdriver, timeout).until(
