@@ -35,30 +35,16 @@ class KaskoCalcPage(PageObject):
     driver_sex = MultySelectTextbox(css=dvr_fmt("Пол водителя"))
     driver_is_married = MultySelectTextbox(css=dvr_fmt("Состояние в браке"))
     driver_has_children = MultySelectTextbox(css=dvr_fmt("Дети"))
+    car_mileage = Textbox(css="input[ng-model='vm.CarParams.mileage']")
     car_start_using_date = Textbox(
         css="div[ng-model='vm.CarParams.StartUsingDate'] input")
     car_price = Slider(css="div[ng-model='vm.SumSlider.value'] input")
-    car_price2 = Textbox(css="input[name='price']")
+    car_price2 = Textbox(css="input[ng-model='vm.CarParams.selectedPrice']")
     calculate = Button(css="button[ng-model='vm.isSubmitting']")
     variants = VariantsSlider(css="div[ng-model='kcc.selectedVariantNumber']")
 
-    def car_mileage(self, value):
-        if value is None:
-            return
-
-        value = str(value).strip().lower()
-        if not value:
-            return
-
-        self.webdriver.execute_script(
-            """
-            var e = $("input[ng-model='vm.cxFormInputValue']");
-            e.val({0}).change();
-            e.next().next().click();
-            """.format(value))
-
-    def wait_for_calculate(self, timeout=180):
+    def wait_for_calculate(self, timeout=300):
         WebDriverWait(self.webdriver, timeout).until(
             EC.visibility_of_element_located((
-                By.ID, "kaskoCalculationCoverTypeSelect")),
+                By.ID, "kaskoCalculationBlock")),
             'Calculation timeout is expired!')

@@ -18,7 +18,7 @@ from pages import KaskoCalcPage
 from elements import AVG
 
 
-PAGE_LOAD_TIMEOUT = 180
+PAGE_LOAD_TIMEOUT = 300
 
 
 logging.basicConfig(format=("%(asctime)s  %(levelname)-8s "
@@ -112,9 +112,10 @@ def calculate(params):
         driver.set_page_load_timeout(PAGE_LOAD_TIMEOUT)
         logging.debug('Set page_load_timeout=%d', PAGE_LOAD_TIMEOUT)
 
-        page = KaskoCalcPage(driver)
         logging.debug('Opening "%s"', KaskoCalcPage.URL)
-        page.get(KaskoCalcPage.URL)
+        driver.get(KaskoCalcPage.URL)
+
+        page = KaskoCalcPage(driver)
 
         if params["city"]:
             page.city = params["city"]
@@ -137,7 +138,10 @@ def calculate(params):
         page.car_modification = AVG
         page.car_engine_model = AVG
 
-        page.car_mileage(int(params["car_mileage"]))
+        if params["car_is_new"] == "Новый":
+            page.car_is_new = "Новый/куплен менее месяца назад"
+        elif params["car_is_new"] == "С пробегом":
+            page.car_is_new = "Неновый/куплен более месяца назад "
 
         page.antitheft_system = params["antitheft_system"]
 
@@ -160,15 +164,17 @@ def calculate(params):
             page.driver_is_married = params["driver_is_married"][i]
             page.driver_has_children = params["driver_has_children"][i]
 
+        page.car_mileage.enter_number(params["car_mileage"])
+
         try:
             page.car_start_using_date = params["car_start_using_date"]
             page.car_price = params["car_price"]
             sleep(1)
-            actual_price = page.car_price.value
+            actual_price = page.car_price.value.replace('\xa0', '')
         except:
-            page.car_price2 = params["car_price"]
+            page.car_price2.enter_number(params["car_price"])
             sleep(1)
-            actual_price = page.car_price2.value
+            actual_price = page.car_price2.value.replace('\xa0', '')
 
         page.calculate.move_to_self()
         page.calculate.click()
