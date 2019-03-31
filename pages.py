@@ -2,7 +2,7 @@
 
 from page_object import PageObject
 from page_object.ui import Button, Link
-from page_object.ui.jquery import Textbox
+from page_object.ui.jquery import Select, Textbox
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
@@ -36,6 +36,8 @@ class KaskoCalcPage(PageObject):
     driver_is_married = MultySelectTextbox(css=dvr_fmt("Состояние в браке"))
     driver_has_children = MultySelectTextbox(css=dvr_fmt("Дети"))
     car_mileage = Textbox(css="input[ng-model='vm.CarParams.mileage']")
+    payment_method = Select(
+        css="select[ng-model='vm.CarParams.selectedPaymentMethod']")
     car_start_using_date = Textbox(
         css="div[ng-model='vm.CarParams.StartUsingDate'] input")
     car_price = Slider(css="div[ng-model='vm.SumSlider.value'] input")
