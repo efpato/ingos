@@ -47,19 +47,20 @@ def load(filename):
                 "car_is_new": sheet.cell_value(row, 7),
                 "car_mileage": sheet.cell_value(row, 8),
                 "payment_method": sheet.cell_value(row, 9),
-                "car_start_using_date": sheet.cell_value(row, 10),
-                "car_price": int(sheet.cell_value(row, 11)),
-                "antitheft_system": sheet.cell_value(row, 12),
+                "calculation_target": sheet.cell_value(row, 10),
+                "car_start_using_date": sheet.cell_value(row, 11),
+                "car_price": int(sheet.cell_value(row, 12)),
+                "antitheft_system": sheet.cell_value(row, 13),
                 "driver_age": str(
-                    sheet.cell_value(row, 13)).split(';'),
-                "driver_experience": str(
                     sheet.cell_value(row, 14)).split(';'),
-                "driver_sex": str(
+                "driver_experience": str(
                     sheet.cell_value(row, 15)).split(';'),
-                "driver_has_children": str(
+                "driver_sex": str(
                     sheet.cell_value(row, 16)).split(';'),
+                "driver_has_children": str(
+                    sheet.cell_value(row, 17)).split(';'),
                 "driver_is_married": str(
-                    sheet.cell_value(row, 17)).split(';')
+                    sheet.cell_value(row, 18)).split(';')
             })
 
     logging.debug('Data has been loaded (%d rows)', len(data))
@@ -87,7 +88,7 @@ def report(filename, results):
             else:
                 for result in results[row]:
                     if not isinstance(result, tuple):   # new price
-                        sheet_out.write(row, 11, result)
+                        sheet_out.write(row, 12, result)
                     else:
                         total, description = result
                         sheet_out.write(row, col, total)
@@ -167,6 +168,7 @@ def calculate(params):
 
         page.car_mileage.enter_number(params["car_mileage"])
         page.payment_method = params["payment_method"]
+        page.calculation_target = params["calculation_target"]
 
         try:
             page.car_start_using_date = params["car_start_using_date"]

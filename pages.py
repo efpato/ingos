@@ -38,6 +38,7 @@ class KaskoCalcPage(PageObject):
     car_mileage = Textbox(css="input[ng-model='vm.CarParams.mileage']")
     payment_method = Select(
         css="select[ng-model='vm.CarParams.selectedPaymentMethod']")
+    calculation_target = Select(css="select[ng-model='vm.CalculationTarget']")
     car_start_using_date = Textbox(
         css="div[ng-model='vm.CarParams.StartUsingDate'] input")
     car_price = Slider(css="div[ng-model='vm.SumSlider.value'] input")
