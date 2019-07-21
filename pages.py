@@ -44,6 +44,10 @@ class KaskoCalcPage(PageObject):
     car_price = Slider(css="div[ng-model='vm.SumSlider.value'] input")
     car_price2 = Textbox(css="input[ng-model='vm.CarParams.selectedPrice']")
     calculate = Button(css="button[ng-model='vm.isSubmitting']")
+    client_name = Textbox(css="input[ng-model='vm.ClientName']")
+    client_email = Textbox(css="div[ng-model='vm.ClientMail'] > input")
+    client_phone = Textbox(css="div[ng-model='vm.ClientPhone'] > input")
+    calculate_continue = Button(css="button[ng-model='vm.isSubmitting']")
     variants = VariantsSlider(css="div[ng-model='kcc.selectedVariantNumber']")
 
     def wait_for_calculate(self, timeout=300):

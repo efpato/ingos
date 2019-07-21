@@ -186,6 +186,15 @@ def calculate(params):
 
         page.calculate.move_to_self()
         page.calculate.click()
+
+        try:
+            page.client_name = "Иванов Иван Петрович"
+            page.client_email = "gfqmuhzl29@post-shift.ru"
+            page.client_phone = "+7 (923) 361-96-24"
+            page.calculate_continue.click()
+        except:
+            pass
+
         page.wait_for_calculate()
 
         result = [actual_price]
