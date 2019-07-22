@@ -7,12 +7,13 @@ import os
 import signal
 import sys
 import traceback
-from time import sleep
+from time import sleep, time
 from datetime import date
 
 import xlrd
 import xlsxwriter
 from selenium.webdriver import Chrome, ChromeOptions
+from post_shift_client import PostShiftClient
 
 from pages import KaskoCalcPage
 from elements import AVG
@@ -188,9 +189,11 @@ def calculate(params):
         page.calculate.click()
 
         try:
-            page.client_name = "Иванов Иван Петрович"
-            page.client_email = "gfqmuhzl29@post-shift.ru"
-            page.client_phone = "+7 (923) 361-96-24"
+            page.client_name = "Иванов Сидр Петрович"
+            page.client_email = PostShiftClient().email
+            ts = str(int(time()))
+            page.client_phone = "+7 (%s) %s-%s-%s" % (
+                ts[:3], ts[3:6], ts[6:8], ts[8:10])
             page.calculate_continue.click()
         except:
             pass
