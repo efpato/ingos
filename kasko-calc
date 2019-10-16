@@ -108,8 +108,8 @@ def calculate(params):
     driver = None
 
     options = ChromeOptions()
-    options.add_argument('headless')
-    options.add_argument('window-size=1280x800')
+#     options.add_argument('headless')
+#     options.add_argument('window-size=1280x800')
 
     try:
         driver = Chrome(chrome_options=options)
