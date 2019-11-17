@@ -173,7 +173,7 @@ def calculate(params):
             page.driver_has_children = params["driver_has_children"][i]
 
         page.car_mileage.enter_number(params["car_mileage"])
-        page.payment_method = params["payment_method"]
+#         page.payment_method = params["payment_method"]
         page.calculation_target = params["calculation_target"]
 
         try:
